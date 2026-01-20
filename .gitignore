@@ -1,0 +1,50 @@
+# =========================
+# OS / Editor junk
+# =========================
+.DS_Store
+Thumbs.db
+*.log
+
+# =========================
+# Node / npm
+# =========================
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Cocos Creator cache
+# =========================
+library/
+temp/
+profile/
+local/
+build/
+dist/
+
+# Cocos Creator internal cache
+.creator/
+!/.creator/default-meta.json
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# =========================
+# TypeScript build output
+# =========================
+*.js
+*.js.map
+
+# =========================
+# Optional: platform builds
+# =========================
+# If you want to keep builds OUT of git
+build-*/
