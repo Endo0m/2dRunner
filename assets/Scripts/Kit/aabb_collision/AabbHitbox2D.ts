@@ -1,10 +1,15 @@
-import { _decorator, Component, Rect, Vec3 } from 'cc';
+import { _decorator, Component, Rect, Vec3, Enum } from 'cc';
 import { HitboxKind } from './HitboxKind';
 
 const { ccclass, property } = _decorator;
 
 @ccclass('AabbHitbox2D')
 export class AabbHitbox2D extends Component {
+    public static readonly active = new Set<AabbHitbox2D>();
+
+    @property({ type: Enum(HitboxKind) })
+    public kind: HitboxKind = HitboxKind.Player;
+
     @property
     public width = 80;
 
@@ -17,24 +22,25 @@ export class AabbHitbox2D extends Component {
     @property
     public offsetY = 0;
 
-    @property({ type: HitboxKind })
-    public kind: HitboxKind = HitboxKind.Trigger;
-
-    /**
-     * Layer (0..31). Как "physics layers": кто ты.
-     */
     @property
     public layer = 0;
 
-    /**
-     * Mask битами: с какими layers ты вообще хочешь сталкиваться.
-     * Пример: mask = (1<<2) | (1<<3)
-     */
     @property
     public mask = 0xFFFFFFFF;
 
-    private readonly rect = new Rect();
     private readonly tmpScale = new Vec3();
+
+    onEnable(): void {
+        AabbHitbox2D.active.add(this);
+    }
+
+    onDisable(): void {
+        AabbHitbox2D.active.delete(this);
+    }
+
+    onDestroy(): void {
+        AabbHitbox2D.active.delete(this);
+    }
 
     public isEnabled(): boolean {
         return this.enabled && this.node.activeInHierarchy;
@@ -45,7 +51,6 @@ export class AabbHitbox2D extends Component {
     }
 
     public getWorldAabb(out: Rect): Rect {
-        // Учитываем scale (rotation игнорируем — для UI/playables обычно ок)
         const p = this.node.worldPosition;
         this.tmpScale.set(this.node.worldScale);
 

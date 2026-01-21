@@ -2,12 +2,12 @@
   "ver": "1.1.50",
   "importer": "prefab",
   "imported": true,
-  "uuid": "52e755e0-43d7-419c-8837-e042439c9a06",
+  "uuid": "5830dfb7-0b62-4bfe-8f68-269f02f57c1c",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "footer"
+    "syncNodeName": "money"
   }
 }
