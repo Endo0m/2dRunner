@@ -4,4 +4,5 @@ export enum HitboxKind {
     Damage = 3,
     Trigger = 4,
     Finish = 5,
+    Enemy = 6
 }

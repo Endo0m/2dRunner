@@ -11,6 +11,8 @@ import { PlayerJumpController } from '../Player/PlayerJumpController';
 import { HealthController } from '../Player/HealthController';
 import { PlayerAnimationController } from '../Player/PlayerAnimationController';
 import { AudioController } from './AudioController';
+import { EnemyStartTrigger } from '../Enemies/EnemyStartTrigger';
+
 import { ConfettiBurst } from '../UI/ConfettiBurst';
 const { ccclass, property } = _decorator;
 
@@ -53,12 +55,13 @@ public playerAnim: PlayerAnimationController | null = null;
     public resultPanel: ResultPanelController | null = null;
 
     private state: GameFlowState = GameFlowState.AwaitingStart;
-    // private lives = 3;
+    
     private sessionCoins = 0;
 
     onEnable(): void {
         this.collisionWorld?.setListener(this);
-        // this.enterAwaitingStart();
+        
+    this.resetToStart();
         this.health!.onLivesChanged = (lives) => this.hud?.setLives(lives);
         this.health!.onDied = () => this.lose();
 this.health!.onDamaged = () => {
@@ -72,6 +75,23 @@ this.health!.onDamaged = () => {
     onDisable(): void {
         this.collisionWorld?.setListener(null);
     }
+private resetToStart(): void {
+    this.state = GameFlowState.AwaitingStart;
+
+    this.sessionCoins = 0;
+
+    this.worldScroller?.setRunning(false);
+    this.playerJump?.setEnabled(false);
+
+    this.hud?.setCoins(0);
+
+    this.health?.resetToMax(); 
+
+    this.resultPanel?.hide();
+    this.tutorialPanel?.show('Tap to start');
+
+    this.playerAnim?.playIdle();
+}
 
     public onTap(): void {
     if (this.state === GameFlowState.AwaitingStart) {
@@ -107,37 +127,28 @@ public onAabbEnter(self: AabbHitbox2D, other: AabbHitbox2D): void {
         case HitboxKind.Finish:
             this.win();
             break;
+        case HitboxKind.Enemy: {
+            const trigger = other.node.getComponent(EnemyStartTrigger);
+            trigger?.startEnemy();
+            break;
+}  
     }
 }
 
 
-    // private enterAwaitingStart(): void {
-    //     this.state = GameFlowState.AwaitingStart;
-
-    //     this.worldScroller?.setRunning(false);
-    //     this.playerJump?.setEnabled(false);
-
-    //     this.sessionCoins = 0;
-    //     this.lives = 3;
-
-    //     this.hud?.setCoins(0);
-    //     this.hud?.setLives(this.lives);
-    //     this.health?.resetToMax();
-    //     this.hud?.setLives(this.health?.getLives() ?? 3);
-
-    //     this.resultPanel?.hide();
-    //     this.tutorialPanel?.show('Tap to start');
-    // }
 
 
-  private startRun(): void {
+private startRun(): void {
     this.state = GameFlowState.Running;
 
     this.audio?.playGameplayMusic();
     this.playerAnim?.playRun();
 
     this.tutorialPanel?.hide();
-    this.playerJump?.setEnabled(true);
+
+   
+    this.playerJump?.setEnabled(false);
+
     this.worldScroller?.setRunning(true);
 }
 
@@ -150,15 +161,19 @@ public onAabbEnter(self: AabbHitbox2D, other: AabbHitbox2D): void {
         this.tutorialPanel?.show(text);
     }
 
-    private resumeFromTutorialWithJump(): void {
-        this.state = GameFlowState.Running;
-        this.tutorialPanel?.hide();
-        this.worldScroller?.setRunning(true);
-        this.playerAnim?.playRun();
+   private resumeFromTutorialWithJump(): void {
+    this.state = GameFlowState.Running;
 
-        this.playerJump?.jump();
+    this.tutorialPanel?.hide();
+    this.worldScroller?.setRunning(true);
+    this.playerAnim?.playRun();
 
-    }
+    this.playerJump?.setEnabled(true);
+
+    
+    this.playerJump?.jump();
+}
+
 
     private collectPickup(pickupNode: any): void {
         const amount = this.hud?.rollPickupAmount(10, 20) ?? 10;
@@ -170,17 +185,7 @@ public onAabbEnter(self: AabbHitbox2D, other: AabbHitbox2D): void {
         pickupNode?.destroy();
     }
 
-    // private applyDamage(): void {
-    //     this.lives = Math.max(0, this.lives - 1);
-    //     this.hud?.setLives(this.lives);
-    //     if (!this.health) return;
-
-    //      const applied = this.health.tryApplyDamage(1);
-    //      if (!applied) return;
-    //     if (this.lives <= 0) {
-    //         this.lose();
-    //     }
-    // }
+  
 private applyDamage(): void {
     if (!this.health) return;
     this.health.tryApplyDamage(1);
