@@ -9,9 +9,9 @@ import { HudController } from '.././UI/HudController';
 import { ResultPanelController, ResultVariant } from '.././UI/ResultPanelController';
 import { PlayerJumpController } from '../Player/PlayerJumpController';
 import { HealthController } from '../Player/HealthController';
-import { ScreenVisibilityActivator } from '../Enemies/ScreenVisibilityActivator';
 import { PlayerAnimationController } from '../Player/PlayerAnimationController';
 import { AudioController } from './AudioController';
+import { ConfettiBurst } from '../UI/ConfettiBurst';
 const { ccclass, property } = _decorator;
 
 enum GameFlowState {
@@ -26,8 +26,10 @@ enum GameFlowState {
 export class GameFlowController extends Component implements IAabbCollisionListener {
     @property({ type: WorldScroller })
     public worldScroller: WorldScroller | null = null;
-    @property({ type: ScreenVisibilityActivator })
-public enemyVisibility: ScreenVisibilityActivator | null = null;
+
+@property({ type: ConfettiBurst })
+public confetti: ConfettiBurst | null = null;
+
 @property({ type: AudioController })
 public audio: AudioController | null = null;
 
@@ -126,12 +128,7 @@ public onAabbEnter(self: AabbHitbox2D, other: AabbHitbox2D): void {
     //     this.resultPanel?.hide();
     //     this.tutorialPanel?.show('Tap to start');
     // }
-private setEnemyPaused(paused: boolean): void {
-    if (this.enemyVisibility) {
-        this.enemyVisibility.paused = paused;
-    }
 
-}
 
   private startRun(): void {
     this.state = GameFlowState.Running;
@@ -151,7 +148,6 @@ private setEnemyPaused(paused: boolean): void {
 
         this.worldScroller?.setRunning(false);
         this.tutorialPanel?.show(text);
-        this.setEnemyPaused(true);
     }
 
     private resumeFromTutorialWithJump(): void {
@@ -161,7 +157,6 @@ private setEnemyPaused(paused: boolean): void {
         this.playerAnim?.playRun();
 
         this.playerJump?.jump();
-        this.setEnemyPaused(false);
 
     }
 
@@ -194,6 +189,7 @@ private applyDamage(): void {
     public win(): void {
         if (this.state === GameFlowState.Won || this.state === GameFlowState.Lost) return;
         this.state = GameFlowState.Won;
+this.confetti?.burst();
 
         this.worldScroller?.setRunning(false);
         this.playerJump?.setEnabled(false);
