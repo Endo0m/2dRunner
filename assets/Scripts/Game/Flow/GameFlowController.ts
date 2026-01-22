@@ -12,7 +12,7 @@ import { HealthController } from '../Player/HealthController';
 import { PlayerAnimationController } from '../Player/PlayerAnimationController';
 import { AudioController } from './AudioController';
 import { EnemyStartTrigger } from '../Enemies/EnemyStartTrigger';
-
+import { PraisePopupController } from '../UI/PraisePopupController';
 import { ConfettiBurst } from '../UI/ConfettiBurst';
 const { ccclass, property } = _decorator;
 
@@ -28,7 +28,9 @@ enum GameFlowState {
 export class GameFlowController extends Component implements IAabbCollisionListener {
     @property({ type: WorldScroller })
     public worldScroller: WorldScroller | null = null;
-
+@property({ type: PraisePopupController })
+public praisePopup: PraisePopupController | null = null;
+private pickupCount = 0;
 @property({ type: ConfettiBurst })
 public confetti: ConfettiBurst | null = null;
 
@@ -67,6 +69,7 @@ public playerAnim: PlayerAnimationController | null = null;
 this.health!.onDamaged = () => {
     this.playerAnim?.playHurt();
     this.audio?.playHurt();
+    this.pickupCount = 0;
 };
 
 
@@ -175,15 +178,28 @@ private startRun(): void {
 }
 
 
-    private collectPickup(pickupNode: any): void {
-        const amount = this.hud?.rollPickupAmount(10, 20) ?? 10;
-        this.sessionCoins += amount;
-    this.audio?.playPickup();  
-        this.hud?.playPickupFlyFx(pickupNode);
-        this.hud?.addCoinsAnimated(amount);
+   private collectPickup(pickupNode: any): void {
+    const amount = this.hud?.rollPickupAmount(10, 20) ?? 10;
+    this.sessionCoins += amount;
 
-        pickupNode?.destroy();
+    this.audio?.playPickup();
+    this.hud?.playPickupFlyFx(pickupNode);
+    this.hud?.addCoinsAnimated(amount);
+
+    this.pickupCount++;
+    if ((this.pickupCount % 2) === 0) {
+        this.praisePopup?.show(this.pickPraiseText());
     }
+
+    pickupNode?.destroy();
+}
+
+private pickPraiseText(): string {
+    
+    const variants = ['Nice!', 'Great!', 'Awesome!', 'Perfect!', 'Cool!'];
+    return variants[Math.floor(Math.random() * variants.length)];
+}
+
 
   
 private applyDamage(): void {
