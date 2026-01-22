@@ -15,9 +15,11 @@ export class HealthController extends Component {
 
     public onLivesChanged: ((lives: number) => void) | null = null;
     public onDied: (() => void) | null = null;
+public onDamaged: (() => void) | null = null;
 
     onEnable(): void {
         this.resetToMax();
+        
     }
 
     update(dt: number): void {
@@ -39,6 +41,7 @@ export class HealthController extends Component {
 
     public tryApplyDamage(amount: number = 1): boolean {
         if (!this.canTakeDamage()) return false;
+this.onDamaged?.();
 
         const nextLives = Math.max(0, this.currentLives - Math.max(1, Math.floor(amount)));
         if (nextLives === this.currentLives) return false;

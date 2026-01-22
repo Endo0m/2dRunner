@@ -1,12 +1,18 @@
 import { _decorator, Component, Node, Tween, tween, Vec3 } from 'cc';
 import { TweenAnimations } from '../../Kit/tweens/TweenAnimations';
-
+import { PlayerAnimationController } from '../Player/PlayerAnimationController';
+import { AudioController } from '../Flow/AudioController';
 const { ccclass, property } = _decorator;
 
 @ccclass('PlayerJumpController')
 export class PlayerJumpController extends Component {
     @property({ type: Node })
     public visualRoot: Node | null = null;
+    @property({ type: PlayerAnimationController })
+public anim: PlayerAnimationController | null = null;
+@property({ type: AudioController })
+public audio: AudioController | null = null;
+
     @property
     public jumpCooldownSeconds = 0.5;
 
@@ -41,11 +47,13 @@ export class PlayerJumpController extends Component {
     }
 }
 
-   public jump(): void {
+public jump(): void {
     if (!this.enabledForInput) return;
     if (this.cooldownTimerSeconds > 0) return;
+this.audio?.playJump();
 
     this.cooldownTimerSeconds = this.jumpCooldownSeconds;
+    this.anim?.playJump();
 
     const target = this.visualRoot ?? this.node;
     TweenAnimations.stopAll(target);
@@ -59,5 +67,6 @@ export class PlayerJumpController extends Component {
         .to(this.downSeconds, { position: down }, { easing: 'quadIn' as any })
         .start();
 }
+
 
 }
